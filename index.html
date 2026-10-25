@@ -22,10 +22,10 @@ section{width:100%;max-width:900px;margin:0 auto}
  .app{display:grid;grid-template-columns:1fr 1fr;align-content:center;column-gap:4vw;row-gap:1vh}
  .ctl{grid-column:1/-1}
  .big{font-size:min(12.5vw,32vh)}.big.h{font-size:min(9vw,24vh)}
+ .lbl{height:1.4em}.big{height:34vh;display:flex;align-items:center;justify-content:center}
  .spk .big{font-size:min(11vw,30vh)}.spk .big.h{font-size:min(8vw,22vh)}}
 /* garis + stickman */
 .lane{position:relative;height:84px;padding:0 24px;margin-top:1vh;--w:48px;--h:64px}
-.lane.s{height:62px;--w:34px;--h:45px}
 .trk{position:relative;height:100%}
 .trk::before{content:"";position:absolute;left:0;right:0;bottom:6px;height:8px;border-radius:4px;background:color-mix(in srgb,var(--fg) 18%,transparent)}
 .trk::after{content:"🏁";position:absolute;right:-8px;bottom:8px;font-size:22px;line-height:1}
@@ -71,7 +71,7 @@ input[type=time]{width:130px}button.on{background:var(--ac);color:var(--bg);font
  <section class="spk" id="spk">
   <div class="lbl" id="sl">PEMBICARA 1 / 5</div>
   <div class="big" id="st">08:00</div>
-  <div class="lane s"><div class="trk"><div class="fill" id="f2"></div><div class="run" id="r2"></div></div></div>
+  <div class="lane"><div class="trk"><div class="fill" id="f2"></div><div class="run" id="r2"></div></div></div>
   <div class="chips" id="chips"></div>
  </section>
  <section class="ctl">
