@@ -1,5 +1,9 @@
-const C='timer-v1',F=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(F)));self.skipWaiting()});
+const C='timer-v2',F=['./','manifest.webmanifest','icon-192.png','icon-512.png'];
+async function clean(r){if(!r.redirected)return r;const b=await r.blob();return new Response(b,{status:r.status,statusText:r.statusText,headers:r.headers})}
+self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(C);
+ for(const u of F){try{const r=await fetch(u,{cache:'reload'});if(r.ok)await c.put(u,await clean(r))}catch(_){}}})());self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))));self.clients.claim()});
-self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});
+self.addEventListener('fetch',e=>{const q=e.request;if(q.method!=='GET')return;
+ if(q.mode==='navigate'){e.respondWith(fetch(q).catch(()=>caches.match('./')));return}
+ e.respondWith(caches.match(q).then(r=>r||fetch(q)))});
 self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window'}).then(l=>l.length?l[0].focus():clients.openWindow('./')))});
