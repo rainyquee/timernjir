@@ -49,7 +49,7 @@ details{width:min(100%,460px);background:color-mix(in srgb,var(--fg) 8%,transpar
 summary{cursor:pointer;opacity:.85}
 .set{display:flex;gap:10px;justify-content:center;margin:12px 0}
 .set label,.cols label{display:flex;flex-direction:column;align-items:center;font-size:12px;gap:4px;opacity:.9}
-input[type=number]{width:74px;font-size:22px;text-align:center;padding:6px 4px;border-radius:12px;border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);background:transparent;color:var(--fg)}
+input[type=number],input[type=time]{width:74px;font-size:22px;text-align:center;padding:6px 4px;border-radius:12px;border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);background:transparent;color:var(--fg)}
 input:disabled{opacity:.4}
 input[type=color]{width:52px;height:36px;border:0;background:none;padding:0}
 .cols{display:flex;gap:14px;justify-content:center;margin:12px 0}
@@ -59,10 +59,12 @@ input[type=color]{width:52px;height:36px;border:0;background:none;padding:0}
 #bn.on{opacity:1}
 #over{position:fixed;inset:0;display:none;flex-direction:column;gap:22px;align-items:center;justify-content:center;background:var(--ac);color:var(--bg);font-size:8vmin;font-weight:800;z-index:9;text-align:center;animation:ob 1s infinite}
 #over button{background:var(--bg);color:var(--fg);font-size:22px;padding:16px 40px}@keyframes ob{50%{filter:brightness(1.25)}}
+.set .bell{display:none}[data-mode=bell] .set .bell{display:flex}[data-mode=bell] .set .dur{display:none}
+input[type=time]{width:130px}button.on{background:var(--ac);color:var(--bg);font-weight:700}
 </style></head><body>
 <main class="app">
  <section class="main">
-  <div class="lbl">TOTAL SISA WAKTU</div>
+  <div class="lbl" id="lt">TOTAL SISA WAKTU</div>
   <div class="big" id="tt">40:00</div>
   <div class="lane"><div class="trk"><div id="tks"></div><div class="fill" id="f1"></div><div class="run" id="r1"></div></div></div>
  </section>
@@ -75,11 +77,13 @@ input[type=color]{width:52px;height:36px;border:0;background:none;padding:0}
  <section class="ctl">
   <div class="row"><button id="pv" title="Pembicara sebelumnya">⏮</button><button class="main" id="go">Mulai</button><button id="nx" title="Pembicara berikutnya">⏭</button><button id="rs">Reset</button><button id="fs" title="Layar penuh">⛶</button></div>
   <details><summary>Pengaturan</summary>
+   <div class="row" style="margin-top:10px"><button id="m1">Durasi</button><button id="m2">Jam bel</button></div>
    <div class="set">
-    <label>Total jam<input id="H" type="number" inputmode="numeric" min="0" max="99"></label>
-    <label>Total menit<input id="M" type="number" inputmode="numeric" min="0" max="999"></label>
+    <label class="dur">Total jam<input id="H" type="number" inputmode="numeric" min="0" max="99"></label>
+    <label class="dur">Total menit<input id="M" type="number" inputmode="numeric" min="0" max="999"></label>
     <label>Pembicara<input id="N" type="number" inputmode="numeric" min="1" max="20"></label>
     <label>Penutupan (mnt)<input id="K" type="number" inputmode="numeric" min="0" max="60"></label>
+    <label class="bell">Bel berbunyi jam<input id="T" type="time"></label>
    </div>
    <div class="hint" id="hint">Waktu dibagi rata otomatis ke semua pembicara.</div>
    <div class="row"><span style="font-size:13px;opacity:.8">Tambah waktu pembicara ini:</span><button id="p1">+1 mnt</button><button id="p5">+5 mnt</button></div>
@@ -93,7 +97,7 @@ input[type=color]{width:52px;height:36px;border:0;background:none;padding:0}
 <div id="over"><div>⏰ Waktu habis!</div><button id="stop">Matikan</button></div>
 <script>
 const $=s=>document.querySelector(s),root=document.documentElement,pad=n=>String(n).padStart(2,'0');
-let cfg={bg:'#0f172a',fg:'#f8fafc',ac:'#22d3ee',H:0,M:40,N:5,K:3,snd:true};
+let cfg={bg:'#0f172a',fg:'#f8fafc',ac:'#22d3ee',H:0,M:40,N:5,K:3,mode:'dur',T:'08:45',snd:true};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('timer')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('timer',JSON.stringify(cfg))}catch(e){}};
 const RUN='<svg class="rn" viewBox="0 0 60 80" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><g class="lg l2"><line x1="33" y1="60" x2="33" y2="77"/></g><g class="lg l1"><line x1="27" y1="60" x2="27" y2="77"/></g><g class="ar a1"><line x1="30" y1="28" x2="30" y2="44"/></g><line x1="30" y1="22" x2="30" y2="42"/><path d="M22 40h16l4 24H18z" fill="#b91c1c" stroke="#7f1d1d" stroke-width="1.5"/><path d="M20 48h20M19 56h22M27 40v24M33 40v24" stroke="#fecaca" stroke-width="1" opacity=".7"/><g class="ar a2"><line x1="30" y1="28" x2="30" y2="44"/></g><circle cx="30" cy="15" r="7" fill="var(--bg)"/><path d="M23 10l1-8h12l1 8z" fill="#111" stroke="#fff" stroke-width="1.2"/><path d="M23.4 8h13.2" stroke="#facc15" stroke-width="1.6"/></g></svg>';
@@ -105,7 +109,7 @@ function colors(){root.style.setProperty('--bg',cfg.bg);root.style.setProperty('
  $('#cb').value=cfg.bg;$('#cf').value=cfg.fg;$('#ca').value=cfg.ac;document.querySelector('meta[name=theme-color]').content=cfg.bg}
 themes.forEach(t=>{const b=document.createElement('button');b.className='sw';b.style.background=`linear-gradient(135deg,${t[0]} 50%,${t[2]} 50%)`;b.onclick=()=>{[cfg.bg,cfg.fg,cfg.ac]=t;colors();save()};$('#th').append(b)});
 [['cb','bg'],['cf','fg'],['ca','ac']].forEach(([i,k])=>$('#'+i).oninput=e=>{cfg[k]=e.target.value;colors();save()});
-$('#H').value=cfg.H;$('#M').value=cfg.M;$('#N').value=cfg.N;$('#K').value=cfg.K;$('#snd').checked=cfg.snd;
+$('#H').value=cfg.H;$('#M').value=cfg.M;$('#N').value=cfg.N;$('#K').value=cfg.K;$('#T').value=cfg.T;$('#snd').checked=cfg.snd;
 $('#snd').onchange=e=>{cfg.snd=e.target.checked;save()};
 
 /* state */
@@ -114,7 +118,7 @@ const elapsed=()=>state==='run'?Date.now()-t0:el;
 function fmt(t){const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return h?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`}
 function drawTicks(){$('#tks').innerHTML=B.slice(0,-1).map(b=>`<div class="tk" style="left:${total?b/total*100:0}%"></div>`).join('');
  $('#chips').innerHTML=B.map((_,i)=>`<div class="chip">${i+1}</div>`).join('')}
-function plan(){n=Math.max(1,Math.min(20,+$('#N').value||1));total=Math.min(99,+$('#H').value||0)*3600+Math.min(999,+$('#M').value||0)*60;
+function plan(){n=Math.max(1,Math.min(20,+$('#N').value||1));total=cfg.mode==='bell'?bellSecs():Math.min(99,+$('#H').value||0)*3600+Math.min(999,+$('#M').value||0)*60;
  C=Math.min(total,Math.max(0,Math.min(60,+$('#K').value||0))*60);
  B=Array.from({length:n},(_,i)=>Math.round((total-C)*(i+1)/n));if(C>0)B.push(total);drawTicks()}
 function render(){
@@ -125,18 +129,19 @@ function render(){
  $('#tt').textContent=fmt(tr);$('#tt').classList.toggle('h',tr>=3600);
  $('#st').textContent=fmt(sr);$('#st').classList.toggle('h',sr>=3600);
  $('#sl').textContent=i<n?`PEMBICARA ${i+1} / ${n}`:'PENUTUPAN';
+ $('#lt').textContent=cfg.mode==='bell'?'SISA WAKTU SAMPAI BEL '+cfg.T:'TOTAL SISA WAKTU';
  const c=sr<=10&&state!=='idle'?'var(--dg)':sr<=60&&state!=='idle'?'var(--wn)':'var(--ac)';
  $('#spk').style.setProperty('--c',c);$('#spk').classList.toggle('bl',state==='run'&&sr<=10&&sr>0);
  const p1=total?Math.min(100,e/total*100):0,p2=Math.min(100,Math.max(0,(e-s0)/len*100));
  $('#f1').style.width=p1+'%';$('#r1').style.left=p1+'%';$('#f2').style.width=p2+'%';$('#r2').style.left=p2+'%';
  [...$('#chips').children].forEach((x,k)=>{const d=k<i||fin;x.className='chip'+(k===i&&!fin?' on':'')+(d?' done':'');x.textContent=d?'✓':k<n?k+1:'🙏'});
- $('#go').textContent=state==='run'?'Jeda':state==='pause'?'Lanjut':'Mulai';
- ['H','M','N','K'].forEach(id=>$('#'+id).disabled=state==='run'||state==='pause');
- $('#hint').textContent=state==='idle'||state==='done'?'Waktu tiap pembicara = (total − penutupan) ÷ jumlah pembicara.':'Tekan Reset untuk mengubah pengaturan.';
+ $('#go').textContent=state==='run'?(cfg.mode==='bell'?'Berjalan':'Jeda'):state==='pause'?'Lanjut':'Mulai';$('#go').disabled=state==='run'&&cfg.mode==='bell';
+ ['H','M','N','K','T'].forEach(id=>$('#'+id).disabled=state==='run'||state==='pause');
+ $('#hint').textContent=state==='idle'||state==='done'?(cfg.mode==='bell'?'Dihitung dari jam HP sekarang sampai jam bel, dikurangi penutupan, lalu dibagi rata.':'Waktu tiap pembicara = (total − penutupan) ÷ jumlah pembicara.'):'Tekan Reset untuk mengubah pengaturan.';
  document.body.classList.toggle('isrun',state==='run');
  document.title=state==='run'?`${i<n?'P'+(i+1):'Tutup'} ${fmt(sr)} • ${fmt(tr)}`:'Timer Presentasi'}
-function inputs(){if(state!=='idle')return;cfg.H=$('#H').value;cfg.M=$('#M').value;cfg.N=$('#N').value;cfg.K=$('#K').value;save();plan();render()}
-['H','M','N','K'].forEach(i=>$('#'+i).oninput=inputs);
+function inputs(){if(state!=='idle')return;cfg.H=$('#H').value;cfg.M=$('#M').value;cfg.N=$('#N').value;cfg.K=$('#K').value;cfg.T=$('#T').value;save();plan();render()}
+['H','M','N','K','T'].forEach(i=>$('#'+i).oninput=inputs);
 
 /* suara & notif */
 function audio(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();ctx.resume()}catch(e){}}
@@ -150,12 +155,13 @@ async function notify(){if(!('Notification'in window)||Notification.permission!=
  const o={body:'Presentasi '+fmt(total)+' sudah selesai.',icon:'icon-192.png',vibrate:[300,150,300],requireInteraction:true,tag:'timer'};
  try{const r=await navigator.serviceWorker.ready;r.showNotification('⏰ Waktu habis!',o)}catch(e){try{new Notification('⏰ Waktu habis!',o)}catch(_){}}}
 async function wake(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
-function banner(){const b=$('#bn');b.textContent=cur<n?'Giliran Pembicara '+(cur+1)+' 🎤':'Waktu penutupan 🙏';b.classList.add('on');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('on'),3500)}
+function toast(t){const b=$('#bn');b.textContent=t;b.classList.add('on');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('on'),3500)}
+function banner(){toast(cur<n?'Giliran Pembicara '+(cur+1)+' 🎤':'Waktu penutupan 🙏')}
 
 /* kontrol */
 function tick(){if(total&&elapsed()/1000>=total)return finish();render();if(cur>last&&state==='run'){chime();banner()}last=cur}
 function start(){audio();if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
- if(!total)return;t0=Date.now()-el;state='run';clearInterval(iv);iv=setInterval(tick,200);wake();render();last=cur}
+ if(cfg.mode==='bell'&&state==='idle')plan();if(!total){toast(cfg.mode==='bell'?'Jam bel sudah lewat':'Isi total waktu dulu');return}t0=Date.now()-el;state='run';clearInterval(iv);iv=setInterval(tick,200);wake();render();last=cur}
 function pause(){el=Date.now()-t0;state='pause';clearInterval(iv);wl&&wl.release();render()}
 function reset(){clearInterval(iv);state='idle';el=0;wl&&wl.release();plan();render();last=cur}
 function finish(){clearInterval(iv);state='done';el=total*1000;wl&&wl.release();render();$('#over').style.display='flex';alarmOn();notify()}
@@ -171,6 +177,11 @@ $('#stop').onclick=()=>{alarmOff();$('#over').style.display='none';reset()};
 $('#test').onclick=()=>{audio();beep()};
 $('#fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():root.requestFullscreen&&root.requestFullscreen();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state==='run'){tick();wake()}});
-colors();plan();render();last=cur;
+function bellSecs(){const [a,b]=($('#T').value||'0:0').split(':').map(Number),t=new Date();t.setHours(a||0,b||0,0,0);return Math.max(0,Math.floor((t-Date.now())/1000))}
+function modeUI(){document.body.dataset.mode=cfg.mode;$('#m1').classList.toggle('on',cfg.mode==='dur');$('#m2').classList.toggle('on',cfg.mode==='bell')}
+function setMode(m){if(state==='run'||state==='pause')return;cfg.mode=m;save();modeUI();plan();render()}
+$('#m1').onclick=()=>setMode('dur');$('#m2').onclick=()=>setMode('bell');
+setInterval(()=>{if(state==='idle'&&cfg.mode==='bell'){plan();render()}},1000);
+modeUI();colors();plan();render();last=cur;
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
