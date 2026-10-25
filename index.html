@@ -2,127 +2,173 @@
 <html lang="id"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Timer</title>
+<title>Timer Presentasi</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0f172a">
 <link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <script>try{var c=JSON.parse(localStorage.getItem('timer')||'{}'),r=document.documentElement.style;c.bg&&r.setProperty('--bg',c.bg);c.fg&&r.setProperty('--fg',c.fg);c.ac&&r.setProperty('--ac',c.ac)}catch(e){}</script>
 <style>
-:root{--bg:#0f172a;--fg:#f8fafc;--ac:#22d3ee;--s:min(86vw,50vh)}
+:root{--bg:#0f172a;--fg:#f8fafc;--ac:#22d3ee;--wn:#fbbf24;--dg:#f87171}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;transition:background .3s}
-.app{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
-@media (orientation:landscape){.app{flex-direction:row;gap:5vw}:root{--s:min(86vh,48vw)}}
-.clock{position:relative;width:var(--s);height:var(--s);flex:none}
-.clock svg{width:100%;height:100%;transform:rotate(-90deg)}
-.clock circle{fill:none;stroke-width:5}
-.bg{stroke:var(--fg);opacity:.15}
-.pg{stroke:var(--ac);stroke-linecap:round;stroke-dasharray:282.74;transition:stroke-dashoffset .25s linear}
-#time{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--s)*.17);font-weight:700;font-variant-numeric:tabular-nums}
-.panel{display:flex;flex-direction:column;gap:12px;align-items:center;width:min(92vw,380px)}
-.set{display:flex;gap:8px;align-items:end}
-.set label{display:flex;flex-direction:column;font-size:12px;opacity:.7;gap:4px;align-items:center}
-input[type=number]{width:76px;font-size:26px;text-align:center;padding:8px 4px;border-radius:12px;border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);background:transparent;color:var(--fg)}
-.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+.app{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;gap:2.5vh;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+section{width:100%;max-width:900px;margin:0 auto}
+.lbl{font-size:max(12px,2.3vmin);letter-spacing:.14em;opacity:.7;text-align:center;font-weight:600}
+.big{font-weight:800;font-variant-numeric:tabular-nums;text-align:center;line-height:1.05;font-size:min(24vw,16vh)}
+.big.h{font-size:min(17vw,12vh)}
+.spk .big{color:var(--c,var(--ac));font-size:min(21vw,14vh)}.spk .big.h{font-size:min(15vw,10vh)}
+.spk.bl .big{animation:bl .8s steps(2) infinite}@keyframes bl{50%{opacity:.35}}
+@media (orientation:landscape){
+ .app{display:grid;grid-template-columns:1fr 1fr;align-content:center;column-gap:4vw;row-gap:1vh}
+ .ctl{grid-column:1/-1}
+ .big{font-size:min(12.5vw,32vh)}.big.h{font-size:min(9vw,24vh)}
+ .spk .big{font-size:min(11vw,30vh)}.spk .big.h{font-size:min(8vw,22vh)}}
+/* garis + stickman */
+.lane{position:relative;height:84px;padding:0 24px;margin-top:1vh;--w:48px;--h:64px}
+.lane.s{height:62px;--w:34px;--h:45px}
+.trk{position:relative;height:100%}
+.trk::before{content:"";position:absolute;left:0;right:0;bottom:6px;height:8px;border-radius:4px;background:color-mix(in srgb,var(--fg) 18%,transparent)}
+.trk::after{content:"🏁";position:absolute;right:-8px;bottom:8px;font-size:22px;line-height:1}
+.fill{position:absolute;left:0;bottom:6px;height:8px;border-radius:4px;background:var(--c,var(--ac));width:0}
+.tk{position:absolute;bottom:2px;width:2px;height:16px;background:var(--fg);opacity:.45}
+.run{position:absolute;left:0;bottom:11px;width:var(--w);height:var(--h);transform:translateX(-50%);color:var(--fg)}
+.rn{width:100%;height:100%;overflow:visible}
+.rn *{animation-play-state:paused}.isrun .rn *{animation-play-state:running}
+.bob{animation:bob .2s ease-in-out infinite alternate}@keyframes bob{to{transform:translateY(-3px)}}
+.lg{--a:38deg;transform-origin:30px 60px}.ar{--a:50deg;transform-origin:30px 28px}
+.l1,.a2{animation:sw .4s ease-in-out infinite alternate}.l2,.a1{animation:sw .4s ease-in-out infinite alternate-reverse}
+@keyframes sw{from{transform:rotate(calc(var(--a)*-1))}to{transform:rotate(var(--a))}}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:1.5vh}
+.chip{min-width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;border:2px solid color-mix(in srgb,var(--fg) 30%,transparent)}
+.chip.on{background:var(--ac);color:var(--bg);border-color:var(--ac);transform:scale(1.18)}.chip.done{opacity:.4}
+.ctl{display:flex;flex-direction:column;align-items:center;gap:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
 button{font:inherit;color:var(--fg);background:color-mix(in srgb,var(--fg) 12%,transparent);border:0;border-radius:12px;padding:10px 14px;cursor:pointer}
-button.main{background:var(--ac);color:var(--bg);font-weight:700;font-size:20px;padding:12px 30px}
-details{width:100%;background:color-mix(in srgb,var(--fg) 8%,transparent);border-radius:14px;padding:10px 14px}
+button.main{background:var(--ac);color:var(--bg);font-weight:800;font-size:20px;padding:12px 30px}
+details{width:min(100%,460px);background:color-mix(in srgb,var(--fg) 8%,transparent);border-radius:14px;padding:10px 14px}
 summary{cursor:pointer;opacity:.85}
+.set{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.set label,.cols label{display:flex;flex-direction:column;align-items:center;font-size:12px;gap:4px;opacity:.9}
+input[type=number]{width:74px;font-size:22px;text-align:center;padding:6px 4px;border-radius:12px;border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);background:transparent;color:var(--fg)}
+input:disabled{opacity:.4}
+input[type=color]{width:52px;height:36px;border:0;background:none;padding:0}
 .cols{display:flex;gap:14px;justify-content:center;margin:12px 0}
-.cols label{display:flex;flex-direction:column;align-items:center;font-size:12px;gap:4px}
-input[type=color]{width:52px;height:38px;border:0;background:none;padding:0}
-.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--fg)}
-#over{position:fixed;inset:0;display:none;flex-direction:column;gap:22px;align-items:center;justify-content:center;background:var(--ac);color:var(--bg);font-size:8vmin;font-weight:800;z-index:9;animation:bl 1s infinite}
-#over button{background:var(--bg);color:var(--fg);font-size:22px;padding:16px 40px}
-@keyframes bl{50%{filter:brightness(1.25)}}
+.sw{width:32px;height:32px;border-radius:50%;border:2px solid var(--fg);padding:0}
+.hint{font-size:12px;opacity:.6;text-align:center;margin:4px 0}
+#bn{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:var(--ac);color:var(--bg);padding:10px 20px;border-radius:14px;font-weight:800;opacity:0;pointer-events:none;transition:opacity .3s;z-index:8;white-space:nowrap}
+#bn.on{opacity:1}
+#over{position:fixed;inset:0;display:none;flex-direction:column;gap:22px;align-items:center;justify-content:center;background:var(--ac);color:var(--bg);font-size:8vmin;font-weight:800;z-index:9;text-align:center;animation:ob 1s infinite}
+#over button{background:var(--bg);color:var(--fg);font-size:22px;padding:16px 40px}@keyframes ob{50%{filter:brightness(1.25)}}
 </style></head><body>
 <main class="app">
- <section class="clock">
-  <svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="45"/><circle class="pg" id="pg" cx="50" cy="50" r="45"/></svg>
-  <div id="time">05:00</div>
+ <section class="main">
+  <div class="lbl">TOTAL SISA WAKTU</div>
+  <div class="big" id="tt">40:00</div>
+  <div class="lane"><div class="trk"><div id="tks"></div><div class="fill" id="f1"></div><div class="run" id="r1"></div></div></div>
  </section>
- <section class="panel">
-  <div class="set">
-   <label>Jam<input id="h" type="number" inputmode="numeric" min="0" max="99" value="0"></label>
-   <label>Menit<input id="m" type="number" inputmode="numeric" min="0" max="59" value="5"></label>
-   <label>Detik<input id="s" type="number" inputmode="numeric" min="0" max="59" value="0"></label>
-  </div>
-  <div class="row" id="pre"></div>
-  <div class="row" id="add"></div>
-  <div class="row"><button class="main" id="go">Mulai</button><button id="rs">Reset</button><button id="fs" title="Layar penuh">⛶</button></div>
-  <details><summary>Warna &amp; suara</summary>
-   <div class="cols">
-    <label>Latar<input type="color" id="cb"></label>
-    <label>Teks<input type="color" id="cf"></label>
-    <label>Aksen<input type="color" id="ca"></label>
+ <section class="spk" id="spk">
+  <div class="lbl" id="sl">PEMBICARA 1 / 5</div>
+  <div class="big" id="st">08:00</div>
+  <div class="lane s"><div class="trk"><div class="fill" id="f2"></div><div class="run" id="r2"></div></div></div>
+  <div class="chips" id="chips"></div>
+ </section>
+ <section class="ctl">
+  <div class="row"><button id="pv" title="Pembicara sebelumnya">⏮</button><button class="main" id="go">Mulai</button><button id="nx" title="Pembicara berikutnya">⏭</button><button id="rs">Reset</button><button id="fs" title="Layar penuh">⛶</button></div>
+  <details><summary>Pengaturan</summary>
+   <div class="set">
+    <label>Total jam<input id="H" type="number" inputmode="numeric" min="0" max="99"></label>
+    <label>Total menit<input id="M" type="number" inputmode="numeric" min="0" max="999"></label>
+    <label>Pembicara<input id="N" type="number" inputmode="numeric" min="1" max="20"></label>
    </div>
+   <div class="hint" id="hint">Waktu dibagi rata otomatis ke semua pembicara.</div>
+   <div class="row"><span style="font-size:13px;opacity:.8">Tambah waktu pembicara ini:</span><button id="p1">+1 mnt</button><button id="p5">+5 mnt</button></div>
+   <div class="cols"><label>Latar<input type="color" id="cb"></label><label>Teks<input type="color" id="cf"></label><label>Aksen<input type="color" id="ca"></label></div>
    <div class="row" id="th"></div>
-   <div class="row" style="margin-top:12px"><label><input type="checkbox" id="snd" checked> Bunyi alarm</label>
-   <button id="test">Tes alarm</button></div>
+   <div class="row" style="margin-top:12px"><label><input type="checkbox" id="snd"> Bunyi alarm</label><button id="test">Tes alarm</button></div>
   </details>
  </section>
 </main>
+<div id="bn"></div>
 <div id="over"><div>⏰ Waktu habis!</div><button id="stop">Matikan</button></div>
 <script>
-const $=s=>document.querySelector(s),root=document.documentElement;
-let cfg={bg:'#0f172a',fg:'#f8fafc',ac:'#22d3ee',h:0,m:5,s:0,snd:true};
+const $=s=>document.querySelector(s),root=document.documentElement,pad=n=>String(n).padStart(2,'0');
+let cfg={bg:'#0f172a',fg:'#f8fafc',ac:'#22d3ee',H:0,M:40,N:5,snd:true};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('timer')||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem('timer',JSON.stringify(cfg))}catch(e){}};
+const RUN='<svg class="rn" viewBox="0 0 60 80" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><g class="lg l2"><line x1="33" y1="60" x2="33" y2="77"/></g><g class="lg l1"><line x1="27" y1="60" x2="27" y2="77"/></g><g class="ar a1"><line x1="30" y1="28" x2="30" y2="44"/></g><line x1="30" y1="22" x2="30" y2="42"/><path d="M22 40h16l4 24H18z" fill="#b91c1c" stroke="#7f1d1d" stroke-width="1.5"/><path d="M20 48h20M19 56h22M27 40v24M33 40v24" stroke="#fecaca" stroke-width="1" opacity=".7"/><g class="ar a2"><line x1="30" y1="28" x2="30" y2="44"/></g><circle cx="30" cy="15" r="7" fill="var(--bg)"/><path d="M23 10l1-8h12l1 8z" fill="#111" stroke="#fff" stroke-width="1.2"/><path d="M23.4 8h13.2" stroke="#facc15" stroke-width="1.6"/></g></svg>';
+$('#r1').innerHTML=RUN;$('#r2').innerHTML=RUN;
+
+/* warna */
 const themes=[['#0f172a','#f8fafc','#22d3ee'],['#000000','#ffffff','#facc15'],['#ffffff','#111827','#2563eb'],['#14532d','#f0fdf4','#4ade80'],['#4c0519','#fff1f2','#fb7185'],['#2e1065','#f5f3ff','#a78bfa']];
 function colors(){root.style.setProperty('--bg',cfg.bg);root.style.setProperty('--fg',cfg.fg);root.style.setProperty('--ac',cfg.ac);
  $('#cb').value=cfg.bg;$('#cf').value=cfg.fg;$('#ca').value=cfg.ac;document.querySelector('meta[name=theme-color]').content=cfg.bg}
-themes.forEach(t=>{const b=document.createElement('button');b.className='sw';b.style.background=`linear-gradient(135deg,${t[0]} 50%,${t[2]} 50%)`;
- b.onclick=()=>{[cfg.bg,cfg.fg,cfg.ac]=t;colors();save()};$('#th').append(b)});
+themes.forEach(t=>{const b=document.createElement('button');b.className='sw';b.style.background=`linear-gradient(135deg,${t[0]} 50%,${t[2]} 50%)`;b.onclick=()=>{[cfg.bg,cfg.fg,cfg.ac]=t;colors();save()};$('#th').append(b)});
 [['cb','bg'],['cf','fg'],['ca','ac']].forEach(([i,k])=>$('#'+i).oninput=e=>{cfg[k]=e.target.value;colors();save()});
-[[1,'1 mnt'],[5,'5 mnt'],[10,'10 mnt'],[25,'25 mnt'],[60,'1 jam']].forEach(([m,l])=>{const b=document.createElement('button');b.textContent=l;
- b.onclick=()=>{$('#h').value=Math.floor(m/60);$('#m').value=m%60;$('#s').value=0;fromInput()};$('#pre').append(b)});
-$('#h').value=cfg.h;$('#m').value=cfg.m;$('#s').value=cfg.s;$('#snd').checked=cfg.snd;
+$('#H').value=cfg.H;$('#M').value=cfg.M;$('#N').value=cfg.N;$('#snd').checked=cfg.snd;
 $('#snd').onchange=e=>{cfg.snd=e.target.checked;save()};
 
-let total=0,left=0,endAt=0,state='idle',iv,alarmIv,ctx,wl;
-const pad=n=>String(n).padStart(2,'0'),C=282.74;
-const readIn=()=>Math.min(99,+$('#h').value||0)*3600+Math.min(59,+$('#m').value||0)*60+Math.min(59,+$('#s').value||0);
+/* state */
+let total=0,n=5,B=[],el=0,t0=0,state='idle',iv,cur=0,last=0,ctx,alarmIv,wl,bt;
+const elapsed=()=>state==='run'?Date.now()-t0:el;
 function fmt(t){const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return h?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`}
-function render(){if(state!=='idle'&&!/INPUT/.test((document.activeElement||{}).tagName||''))setIn(left);$('#time').textContent=fmt(left);$('#pg').style.strokeDashoffset=total?C*(1-left/total):0;
- $('#go').textContent=state==='run'?'Jeda':state==='pause'?'Lanjut':'Mulai';document.title=state==='run'?fmt(left)+' • Timer':'Timer'}
-function fromInput(){cfg.h=$('#h').value;cfg.m=$('#m').value;cfg.s=$('#s').value;save();
- if(state==='done')return;
- total=left=readIn();
- if(state==='run')endAt=Date.now()+left*1000;
- if(state==='pause'&&!left)state='idle';
- render()}
-function setIn(t){$('#h').value=Math.floor(t/3600);$('#m').value=Math.floor(t%3600/60);$('#s').value=t%60}
-function addTime(sec){if(state==='done')return;if(state==='idle')total=left=readIn();
- total+=sec;left+=sec;if(state==='run')endAt+=sec*1000;setIn(left);cfg.h=$('#h').value;cfg.m=$('#m').value;cfg.s=$('#s').value;save();render()}
-[[1,'+1 mnt'],[5,'+5 mnt'],[10,'+10 mnt']].forEach(([m,l])=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>addTime(m*60);$('#add').append(b)});
-['h','m','s'].forEach(i=>$('#'+i).oninput=fromInput);
+function drawTicks(){$('#tks').innerHTML=B.slice(0,-1).map(b=>`<div class="tk" style="left:${total?b/total*100:0}%"></div>`).join('');
+ $('#chips').innerHTML=B.map((_,i)=>`<div class="chip">${i+1}</div>`).join('')}
+function plan(){n=Math.max(1,Math.min(20,+$('#N').value||1));total=Math.min(99,+$('#H').value||0)*3600+Math.min(999,+$('#M').value||0)*60;
+ B=Array.from({length:n},(_,i)=>Math.round(total*(i+1)/n));drawTicks()}
+function render(){
+ const e=elapsed()/1000,fin=total>0&&e>=total;
+ let i=fin?n-1:Math.max(0,B.findIndex(b=>e<b));cur=i;
+ const s0=i?B[i-1]:0,s1=B[i]||0,len=Math.max(1,s1-s0);
+ const tr=Math.max(0,Math.ceil(total-e)),sr=fin?0:Math.max(0,Math.ceil(s1-e));
+ $('#tt').textContent=fmt(tr);$('#tt').classList.toggle('h',tr>=3600);
+ $('#st').textContent=fmt(sr);$('#st').classList.toggle('h',sr>=3600);
+ $('#sl').textContent=`PEMBICARA ${i+1} / ${n}`;
+ const c=sr<=10&&state!=='idle'?'var(--dg)':sr<=60&&state!=='idle'?'var(--wn)':'var(--ac)';
+ $('#spk').style.setProperty('--c',c);$('#spk').classList.toggle('bl',state==='run'&&sr<=10&&sr>0);
+ const p1=total?Math.min(100,e/total*100):0,p2=Math.min(100,Math.max(0,(e-s0)/len*100));
+ $('#f1').style.width=p1+'%';$('#r1').style.left=p1+'%';$('#f2').style.width=p2+'%';$('#r2').style.left=p2+'%';
+ [...$('#chips').children].forEach((x,k)=>{const d=k<i||fin;x.className='chip'+(k===i&&!fin?' on':'')+(d?' done':'');x.textContent=d?'✓':k+1});
+ $('#go').textContent=state==='run'?'Jeda':state==='pause'?'Lanjut':'Mulai';
+ ['H','M','N'].forEach(id=>$('#'+id).disabled=state==='run'||state==='pause');
+ $('#hint').textContent=state==='idle'||state==='done'?'Waktu dibagi rata otomatis ke semua pembicara.':'Tekan Reset untuk mengubah pengaturan.';
+ document.body.classList.toggle('isrun',state==='run');
+ document.title=state==='run'?`P${i+1} ${fmt(sr)} • ${fmt(tr)}`:'Timer Presentasi'}
+function inputs(){if(state!=='idle')return;cfg.H=$('#H').value;cfg.M=$('#M').value;cfg.N=$('#N').value;save();plan();render()}
+['H','M','N'].forEach(i=>$('#'+i).oninput=inputs);
 
+/* suara & notif */
 function audio(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();ctx.resume()}catch(e){}}
-function beep(){if(!ctx||!cfg.snd)return;const t=ctx.currentTime;
- [0,.25,.5,.9,1.15,1.4].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='square';o.frequency.value=d<.8?880:1175;
-  g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.35,t+d+.02);g.gain.linearRampToValueAtTime(0,t+d+.2);
-  o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.22)})}
-function alarmOn(){audio();clearInterval(alarmIv);const go=()=>{beep();navigator.vibrate&&navigator.vibrate([300,150,300,150,300])};go();alarmIv=setInterval(go,2200);
- setTimeout(alarmOff,120000)}
+function tone(seq,type,vol){if(!ctx||!cfg.snd)return;const t=ctx.currentTime;seq.forEach(([d,f])=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f;
+ g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(vol,t+d+.02);g.gain.linearRampToValueAtTime(0,t+d+.2);o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.22)})}
+const chime=()=>{tone([[0,660],[.25,880]],'sine',.5);navigator.vibrate&&navigator.vibrate([200,100,200])};
+const beep=()=>tone([[0,880],[.25,880],[.5,880],[.9,1175],[1.15,1175],[1.4,1175]],'square',.35);
+function alarmOn(){audio();clearInterval(alarmIv);const g=()=>{beep();navigator.vibrate&&navigator.vibrate([300,150,300,150,300])};g();alarmIv=setInterval(g,2200);setTimeout(alarmOff,120000)}
 function alarmOff(){clearInterval(alarmIv);navigator.vibrate&&navigator.vibrate(0)}
 async function notify(){if(!('Notification'in window)||Notification.permission!=='granted')return;
- const o={body:'Timer '+fmt(total)+' sudah selesai.',icon:'icon-192.png',vibrate:[300,150,300],requireInteraction:true,tag:'timer'};
+ const o={body:'Presentasi '+fmt(total)+' sudah selesai.',icon:'icon-192.png',vibrate:[300,150,300],requireInteraction:true,tag:'timer'};
  try{const r=await navigator.serviceWorker.ready;r.showNotification('⏰ Waktu habis!',o)}catch(e){try{new Notification('⏰ Waktu habis!',o)}catch(_){}}}
 async function wake(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
+function banner(){const b=$('#bn');b.textContent='Giliran Pembicara '+(cur+1)+' 🎤';b.classList.add('on');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('on'),3500)}
 
+/* kontrol */
+function tick(){if(total&&elapsed()/1000>=total)return finish();render();if(cur>last&&state==='run'){chime();banner()}last=cur}
 function start(){audio();if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
- if(state==='idle'){total=left=readIn();if(!total)return}
- endAt=Date.now()+left*1000;state='run';clearInterval(iv);iv=setInterval(tick,200);wake();render()}
-function pause(){left=Math.max(0,Math.ceil((endAt-Date.now())/1000));state='pause';clearInterval(iv);wl&&wl.release();render()}
-function reset(){clearInterval(iv);state='idle';wl&&wl.release();total=left=readIn();render()}
-function tick(){left=Math.max(0,Math.ceil((endAt-Date.now())/1000));render();if(left<=0)finish()}
-function finish(){clearInterval(iv);state='done';wl&&wl.release();render();$('#over').style.display='flex';alarmOn();notify()}
+ if(!total)return;t0=Date.now()-el;state='run';clearInterval(iv);iv=setInterval(tick,200);wake();render();last=cur}
+function pause(){el=Date.now()-t0;state='pause';clearInterval(iv);wl&&wl.release();render()}
+function reset(){clearInterval(iv);state='idle';el=0;wl&&wl.release();plan();render();last=cur}
+function finish(){clearInterval(iv);state='done';el=total*1000;wl&&wl.release();render();$('#over').style.display='flex';alarmOn();notify()}
+function jump(ms){if(!total||state==='done')return;ms=Math.max(0,Math.min(total*1000-1,ms));if(state==='run')t0=Date.now()-ms;else el=ms;render();last=cur}
+const st=i=>i>0?B[i-1]:0;
 $('#go').onclick=()=>state==='run'?pause():start();
 $('#rs').onclick=reset;
+$('#nx').onclick=()=>{if(cur<n-1)jump(B[cur]*1000)};
+$('#pv').onclick=()=>jump((elapsed()/1000-st(cur)>3?st(cur):st(Math.max(0,cur-1)))*1000);
+function addCur(s){if(state==='done'||!total)return;for(let k=cur;k<n;k++)B[k]+=s;total+=s;drawTicks();render()}
+$('#p1').onclick=()=>addCur(60);$('#p5').onclick=()=>addCur(300);
 $('#stop').onclick=()=>{alarmOff();$('#over').style.display='none';reset()};
 $('#test').onclick=()=>{audio();beep()};
 $('#fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():root.requestFullscreen&&root.requestFullscreen();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state==='run'){tick();wake()}});
-colors();fromInput();
+colors();plan();render();last=cur;
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>
