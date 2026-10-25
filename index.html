@@ -47,7 +47,7 @@ button{font:inherit;color:var(--fg);background:color-mix(in srgb,var(--fg) 12%,t
 button.main{background:var(--ac);color:var(--bg);font-weight:800;font-size:20px;padding:12px 30px}
 details{width:min(100%,460px);background:color-mix(in srgb,var(--fg) 8%,transparent);border-radius:14px;padding:10px 14px}
 summary{cursor:pointer;opacity:.85}
-.set{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.set{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:12px 0}
 .set label,.cols label{display:flex;flex-direction:column;align-items:center;font-size:12px;gap:4px;opacity:.9}
 input[type=number],input[type=time]{width:74px;font-size:22px;text-align:center;padding:6px 4px;border-radius:12px;border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);background:transparent;color:var(--fg)}
 input:disabled{opacity:.4}
@@ -83,7 +83,7 @@ input[type=time]{width:130px}button.on{background:var(--ac);color:var(--bg);font
     <label class="dur">Total menit<input id="M" type="number" inputmode="numeric" min="0" max="999"></label>
     <label>Pembicara<input id="N" type="number" inputmode="numeric" min="1" max="20"></label>
     <label>Penutupan (mnt)<input id="K" type="number" inputmode="numeric" min="0" max="60"></label>
-    <label class="bell">Bel berbunyi jam<input id="T" type="time"></label>
+    <label class="bell">Jam bel<input id="T" type="time"></label>
    </div>
    <div class="hint" id="hint">Waktu dibagi rata otomatis ke semua pembicara.</div>
    <div class="row"><span style="font-size:13px;opacity:.8">Tambah waktu pembicara ini:</span><button id="p1">+1 mnt</button><button id="p5">+5 mnt</button></div>
@@ -137,7 +137,7 @@ function render(){
  [...$('#chips').children].forEach((x,k)=>{const d=k<i||fin;x.className='chip'+(k===i&&!fin?' on':'')+(d?' done':'');x.textContent=d?'✓':k<n?k+1:'🙏'});
  $('#go').textContent=state==='run'?(cfg.mode==='bell'?'Berjalan':'Jeda'):state==='pause'?'Lanjut':'Mulai';$('#go').disabled=state==='run'&&cfg.mode==='bell';
  ['H','M','N','K','T'].forEach(id=>$('#'+id).disabled=state==='run'||state==='pause');
- $('#hint').textContent=state==='idle'||state==='done'?(cfg.mode==='bell'?'Dihitung dari jam HP sekarang sampai jam bel, dikurangi penutupan, lalu dibagi rata.':'Waktu tiap pembicara = (total − penutupan) ÷ jumlah pembicara.'):'Tekan Reset untuk mengubah pengaturan.';
+ $('#hint').textContent=state==='idle'||state==='done'?(cfg.mode==='bell'?'Dihitung dari jam HP saat Start sampai jam bel, dikurangi penutupan, lalu dibagi rata.':'Waktu tiap pembicara = (total − penutupan) ÷ jumlah pembicara.'):'Tekan Reset untuk mengubah pengaturan.';
  document.body.classList.toggle('isrun',state==='run');
  document.title=state==='run'?`${i<n?'P'+(i+1):'Tutup'} ${fmt(sr)} • ${fmt(tr)}`:'Timer Presentasi'}
 function inputs(){if(state!=='idle')return;cfg.H=$('#H').value;cfg.M=$('#M').value;cfg.N=$('#N').value;cfg.K=$('#K').value;cfg.T=$('#T').value;save();plan();render()}

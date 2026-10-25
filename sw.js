@@ -1,4 +1,4 @@
-const C='timer-v6',F=['./','manifest.webmanifest','icon-192.png','icon-512.png'];
+const C='timer-v8',F=['./','manifest.webmanifest','icon-192.png','icon-512.png'];
 async function clean(r){if(!r.redirected)return r;const b=await r.blob();return new Response(b,{status:r.status,statusText:r.statusText,headers:r.headers})}
 self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(C);
  for(const u of F){try{const r=await fetch(u,{cache:'reload'});if(r.ok)await c.put(u,await clean(r))}catch(_){}}})());self.skipWaiting()});
