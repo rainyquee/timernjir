@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="id"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Timer</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#0f172a;--fg:#f8fafc;--ac:#22d3ee;--s:min(86vw,50vh)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;transition:background .3s}
+.app{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+@media (orientation:landscape){.app{flex-direction:row;gap:5vw}:root{--s:min(86vh,48vw)}}
+.clock{position:relative;width:var(--s);height:var(--s);flex:none}
+.clock svg{width:100%;height:100%;transform:rotate(-90deg)}
+.clock circle{fill:none;stroke-width:5}
+.bg{stroke:var(--fg);opacity:.15}
+.pg{stroke:var(--ac);stroke-linecap:round;stroke-dasharray:282.74;transition:stroke-dashoffset .25s linear}
+#time{position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--s)*.17);font-weight:700;font-variant-numeric:tabular-nums}
+.panel{display:flex;flex-direction:column;gap:12px;align-items:center;width:min(92vw,380px)}
+.set{display:flex;gap:8px;align-items:end}
+.set label{display:flex;flex-direction:column;font-size:12px;opacity:.7;gap:4px;align-items:center}
+input[type=number]{width:76px;font-size:26px;text-align:center;padding:8px 4px;border-radius:12px;border:2px solid color-mix(in srgb,var(--fg) 25%,transparent);background:transparent;color:var(--fg)}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;color:var(--fg);background:color-mix(in srgb,var(--fg) 12%,transparent);border:0;border-radius:12px;padding:10px 14px;cursor:pointer}
+button.main{background:var(--ac);color:var(--bg);font-weight:700;font-size:20px;padding:12px 30px}
+details{width:100%;background:color-mix(in srgb,var(--fg) 8%,transparent);border-radius:14px;padding:10px 14px}
+summary{cursor:pointer;opacity:.85}
+.cols{display:flex;gap:14px;justify-content:center;margin:12px 0}
+.cols label{display:flex;flex-direction:column;align-items:center;font-size:12px;gap:4px}
+input[type=color]{width:52px;height:38px;border:0;background:none;padding:0}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--fg)}
+#over{position:fixed;inset:0;display:none;flex-direction:column;gap:22px;align-items:center;justify-content:center;background:var(--ac);color:var(--bg);font-size:8vmin;font-weight:800;z-index:9;animation:bl 1s infinite}
+#over button{background:var(--bg);color:var(--fg);font-size:22px;padding:16px 40px}
+@keyframes bl{50%{filter:brightness(1.25)}}
+</style></head><body>
+<main class="app">
+ <section class="clock">
+  <svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="45"/><circle class="pg" id="pg" cx="50" cy="50" r="45"/></svg>
+  <div id="time">05:00</div>
+ </section>
+ <section class="panel">
+  <div class="set">
+   <label>Jam<input id="h" type="number" inputmode="numeric" min="0" max="99" value="0"></label>
+   <label>Menit<input id="m" type="number" inputmode="numeric" min="0" max="59" value="5"></label>
+   <label>Detik<input id="s" type="number" inputmode="numeric" min="0" max="59" value="0"></label>
+  </div>
+  <div class="row" id="pre"></div>
+  <div class="row" id="add"></div>
+  <div class="row"><button class="main" id="go">Mulai</button><button id="rs">Reset</button><button id="fs" title="Layar penuh">⛶</button></div>
+  <details><summary>Warna &amp; suara</summary>
+   <div class="cols">
+    <label>Latar<input type="color" id="cb"></label>
+    <label>Teks<input type="color" id="cf"></label>
+    <label>Aksen<input type="color" id="ca"></label>
+   </div>
+   <div class="row" id="th"></div>
+   <div class="row" style="margin-top:12px"><label><input type="checkbox" id="snd" checked> Bunyi alarm</label>
+   <button id="test">Tes alarm</button></div>
+  </details>
+ </section>
+</main>
+<div id="over"><div>⏰ Waktu habis!</div><button id="stop">Matikan</button></div>
+<script>
+const $=s=>document.querySelector(s),root=document.documentElement;
+let cfg={bg:'#0f172a',fg:'#f8fafc',ac:'#22d3ee',h:0,m:5,s:0,snd:true};
+try{Object.assign(cfg,JSON.parse(localStorage.getItem('timer')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('timer',JSON.stringify(cfg))}catch(e){}};
+const themes=[['#0f172a','#f8fafc','#22d3ee'],['#000000','#ffffff','#facc15'],['#ffffff','#111827','#2563eb'],['#14532d','#f0fdf4','#4ade80'],['#4c0519','#fff1f2','#fb7185'],['#2e1065','#f5f3ff','#a78bfa']];
+function colors(){root.style.setProperty('--bg',cfg.bg);root.style.setProperty('--fg',cfg.fg);root.style.setProperty('--ac',cfg.ac);
+ $('#cb').value=cfg.bg;$('#cf').value=cfg.fg;$('#ca').value=cfg.ac;document.querySelector('meta[name=theme-color]').content=cfg.bg}
+themes.forEach(t=>{const b=document.createElement('button');b.className='sw';b.style.background=`linear-gradient(135deg,${t[0]} 50%,${t[2]} 50%)`;
+ b.onclick=()=>{[cfg.bg,cfg.fg,cfg.ac]=t;colors();save()};$('#th').append(b)});
+[['cb','bg'],['cf','fg'],['ca','ac']].forEach(([i,k])=>$('#'+i).oninput=e=>{cfg[k]=e.target.value;colors();save()});
+[[1,'1 mnt'],[5,'5 mnt'],[10,'10 mnt'],[25,'25 mnt'],[60,'1 jam']].forEach(([m,l])=>{const b=document.createElement('button');b.textContent=l;
+ b.onclick=()=>{$('#h').value=Math.floor(m/60);$('#m').value=m%60;$('#s').value=0;fromInput()};$('#pre').append(b)});
+$('#h').value=cfg.h;$('#m').value=cfg.m;$('#s').value=cfg.s;$('#snd').checked=cfg.snd;
+$('#snd').onchange=e=>{cfg.snd=e.target.checked;save()};
+
+let total=0,left=0,endAt=0,state='idle',iv,alarmIv,ctx,wl;
+const pad=n=>String(n).padStart(2,'0'),C=282.74;
+const readIn=()=>Math.min(99,+$('#h').value||0)*3600+Math.min(59,+$('#m').value||0)*60+Math.min(59,+$('#s').value||0);
+function fmt(t){const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return h?`${h}:${pad(m)}:${pad(s)}`:`${pad(m)}:${pad(s)}`}
+function render(){if(state!=='idle'&&!/INPUT/.test((document.activeElement||{}).tagName||''))setIn(left);$('#time').textContent=fmt(left);$('#pg').style.strokeDashoffset=total?C*(1-left/total):0;
+ $('#go').textContent=state==='run'?'Jeda':state==='pause'?'Lanjut':'Mulai';document.title=state==='run'?fmt(left)+' • Timer':'Timer'}
+function fromInput(){cfg.h=$('#h').value;cfg.m=$('#m').value;cfg.s=$('#s').value;save();
+ if(state==='done')return;
+ total=left=readIn();
+ if(state==='run')endAt=Date.now()+left*1000;
+ if(state==='pause'&&!left)state='idle';
+ render()}
+function setIn(t){$('#h').value=Math.floor(t/3600);$('#m').value=Math.floor(t%3600/60);$('#s').value=t%60}
+function addTime(sec){if(state==='done')return;if(state==='idle')total=left=readIn();
+ total+=sec;left+=sec;if(state==='run')endAt+=sec*1000;setIn(left);cfg.h=$('#h').value;cfg.m=$('#m').value;cfg.s=$('#s').value;save();render()}
+[[1,'+1 mnt'],[5,'+5 mnt'],[10,'+10 mnt']].forEach(([m,l])=>{const b=document.createElement('button');b.textContent=l;b.onclick=()=>addTime(m*60);$('#add').append(b)});
+['h','m','s'].forEach(i=>$('#'+i).oninput=fromInput);
+
+function audio(){try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();ctx.resume()}catch(e){}}
+function beep(){if(!ctx||!cfg.snd)return;const t=ctx.currentTime;
+ [0,.25,.5,.9,1.15,1.4].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='square';o.frequency.value=d<.8?880:1175;
+  g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.35,t+d+.02);g.gain.linearRampToValueAtTime(0,t+d+.2);
+  o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.22)})}
+function alarmOn(){audio();clearInterval(alarmIv);const go=()=>{beep();navigator.vibrate&&navigator.vibrate([300,150,300,150,300])};go();alarmIv=setInterval(go,2200);
+ setTimeout(alarmOff,120000)}
+function alarmOff(){clearInterval(alarmIv);navigator.vibrate&&navigator.vibrate(0)}
+async function notify(){if(!('Notification'in window)||Notification.permission!=='granted')return;
+ const o={body:'Timer '+fmt(total)+' sudah selesai.',icon:'icon-192.png',vibrate:[300,150,300],requireInteraction:true,tag:'timer'};
+ try{const r=await navigator.serviceWorker.ready;r.showNotification('⏰ Waktu habis!',o)}catch(e){try{new Notification('⏰ Waktu habis!',o)}catch(_){}}}
+async function wake(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
+
+function start(){audio();if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
+ if(state==='idle'){total=left=readIn();if(!total)return}
+ endAt=Date.now()+left*1000;state='run';clearInterval(iv);iv=setInterval(tick,200);wake();render()}
+function pause(){left=Math.max(0,Math.ceil((endAt-Date.now())/1000));state='pause';clearInterval(iv);wl&&wl.release();render()}
+function reset(){clearInterval(iv);state='idle';wl&&wl.release();total=left=readIn();render()}
+function tick(){left=Math.max(0,Math.ceil((endAt-Date.now())/1000));render();if(left<=0)finish()}
+function finish(){clearInterval(iv);state='done';wl&&wl.release();render();$('#over').style.display='flex';alarmOn();notify()}
+$('#go').onclick=()=>state==='run'?pause():start();
+$('#rs').onclick=reset;
+$('#stop').onclick=()=>{alarmOff();$('#over').style.display='none';reset()};
+$('#test').onclick=()=>{audio();beep()};
+$('#fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():root.requestFullscreen&&root.requestFullscreen();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state==='run'){tick();wake()}});
+colors();fromInput();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
